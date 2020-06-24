@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
-import { View, Text, FlatList, ToastAndroid } from 'react-native';
+import { View, Text, FlatList, ToastAndroid, Button } from 'react-native';
+
+import * as Constants from './constant/Constants';
+//import * as Constants from '../src/constant/Constants';
 
 export default class NavigationTest extends Component {
   constructor(props) {
@@ -9,55 +12,51 @@ export default class NavigationTest extends Component {
     };
   }
 
-  fetchData = async() => {
-    
-    fetch("http://itluma.com/wp-json/wc/v3/products",{
-          method:'post',
-          header: {
-            'Accept':'application/json',            
-            'Content-type':'application/json; charset=UTF-8'
-          },
-          body:JSON.stringify({
-            'Consumer Key': 'ck_0dc52c14d952b11413af77c6b969149cc97f866e',
-            'Consumer Secret': 'cs_7475adc4da4711639669c2d1fd3d875d64bf7169',
-          })          
-        })
-        .then((response) => response.json())       
-        .then((responseJson) => {
-          console.log(JSON.stringify(responseJson)) 
-          this.setState({
-            data: responseJson
-          })        
-        })
-        .catch((error) => {          
-                ToastAndroid.showWithGravity(
-                  "catch Error",
-                  ToastAndroid.SHORT,
-                  ToastAndroid.CENTER
-                );
-          
-        });  
 
+  testFetch() {
+    let timeStamp = Math.floor(Date.now() / 1000);    
+    let url = Constants.URL + Constants.GET_PRODUCTS;    
+    let ck = Constants.CLIENT_KEY;    
+    let cs = Constants.CLIENT_SECRET;    
+    let method = Constants.ENCRYPTION_METHOD;    
+    let base_str = 'GET&' + encodeURIComponent(url) + '&' + encodeURIComponent('oauth_consumer_key=' + ck + '&oauth_nonce=' + timeStamp + '&oauth_signature_method='+ method + '&oauth_timestamp=' + timeStamp);    
+    var hmacsha1 = require('hmacsha1');    
+    var hash = hmacsha1(cs + '&' , base_str);    
+    let urlFetch = url + '?oauth_consumer_key=' + ck + '&oauth_signature_method=' + method + '&oauth_timestamp=' + timeStamp + '&oauth_nonce=' + timeStamp + '&oauth_signature=' + hash
+    console.log('NUEVOS MONITORES ARKUS')
+    console.log(base_str);
+
+
+    fetch(urlFetch, {
+      method: 'GET',
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        //alert(JSON.stringify(response));
+        console.log(JSON.stringify(response))  ;
         
+      })
+      .catch((error) => {
+        alert(error);
+      });
+
   }
 
   componentDidMount(){
-    this.fetchData();
+    this.testFetch;
+    //this.testFetch.bind(this);
   }
-
+  
   render() {
     return (
       <View>
-        <Text> NavigationTest </Text>
-        <FlatList
-        data={this.state.data}
-        keyExtractor={(x,i)=>i}
-        renderItem={({item}) => 
-        <View>
-          <Text>{item.name.rendered}</Text>
-          </View>
-        }
-        />
+        <Text> NavigationTest23062020 </Text>
+        <Button
+            onPress={this.testFetch}  
+            title= 'Fetch'
+            color= 'brown'        
+        >
+        </Button>
 
       </View>
     );
